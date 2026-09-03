@@ -33,3 +33,11 @@ function applyLikedStyle (){
     likeSvg.style.transform = "scale(1.3";
     setTimeout(() => (likeSvg.style.transform = "scale(1")150);
 }
+
+//para números acima de 1000
+
+function formatLikes(num){
+    if(num >=1000){
+        return (num/1000).toFixed(1)+"K";
+    }
+}
