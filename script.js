@@ -5,18 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const likeSvg = likeBtn.querySelector("svg");
   const postMedia = document.querySelector(".post-media");
-  const bookmarkBtn = document.querySelector(".post-actions > .action-btn:last-child");
 
-  // Estado inicial das curtidas
+  // Estado inicial das curtidas e controle
   let isLiked = false;
-  let baseLikes = 1200; // Valor base equivalente ao "1.2K" inicial
+  let baseLikes = 1200; // Valor inicial correspondente a "1.2K"
 
-  // Localiza o nó de texto dentro do botão para atualizar o número
+  // Localiza o texto com o número de curtidas dentro do botão
   let textNode = Array.from(likeBtn.childNodes).find(
     (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""
   );
 
-  // Função para formatar números grandes (ex: 1200 -> 1.2K)
+  // Função para formatar o número (ex: 1201 ou 1.2K se for muito grande)
   function formatLikes(num) {
     if (num >= 1000) {
       return (num / 1000).toFixed(1) + "K";
@@ -24,15 +23,27 @@ document.addEventListener("DOMContentLoaded", () => {
     return num.toString();
   }
 
-  // Atualiza o texto do botão
-  function updateLikesDisplay() {
+  // Atualiza a interface gráfica do botão (Texto, Cor e Animação)
+  function updateLikeUI() {
+    // Atualiza o número no texto
     if (textNode) {
       textNode.textContent = ` ${formatLikes(baseLikes)}`;
     }
-  }
 
-  // Animação de pulso no coração
-  function triggerHeartAnimation() {
+    // Altera a cor do coração e classe
+    if (isLiked) {
+      likeBtn.classList.add("liked");
+      likeSvg.style.fill = "#ef4444";
+      likeSvg.style.stroke = "#ef4444";
+      likeSvg.style.color = "#ef4444";
+    } else {
+      likeBtn.classList.remove("liked");
+      likeSvg.style.fill = "none";
+      likeSvg.style.stroke = "currentColor";
+      likeSvg.style.color = "#1c1e21";
+    }
+
+    // Efeito de pulso/animação no ícone
     if (likeSvg) {
       likeSvg.style.transition = "transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease";
       likeSvg.style.transform = "scale(1.3)";
@@ -42,74 +53,30 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // Aplica os estilos de curtido/não-curtido
-  function updateHeartStyle() {
-    if (isLiked) {
-      likeSvg.style.fill = "#ef4444";
-      likeSvg.style.stroke = "#ef4444";
-      likeSvg.style.color = "#ef4444";
-    } else {
-      likeSvg.style.fill = "none";
-      likeSvg.style.stroke = "currentColor";
-      likeSvg.style.color = "#1c1e21";
-    }
-  }
-
-  // Função para adicionar uma curtida
-  function addLike() {
-    if (!isLiked) {
-      baseLikes++;
-      isLiked = true;
-      updateHeartStyle();
-      updateLikesDisplay();
-      triggerHeartAnimation();
-    }
-  }
-
-  // Clique no botão de curtida (Alterna entre curtir e descurtir)
+  // Evento de clique no BOTÃO DE CORAÇÃO (Alterna curtir e descurtir)
   likeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
 
     if (isLiked) {
+      // Se já estava curtido, descurte (-1)
       isLiked = false;
       baseLikes = Math.max(0, baseLikes - 1);
     } else {
+      // Se não estava curtido, adiciona curtida (+1)
       isLiked = true;
       baseLikes++;
     }
 
-    updateHeartStyle();
-    updateLikesDisplay();
-    triggerHeartAnimation();
+    updateLikeUI();
   });
 
-  // Clique na imagem principal do post (Sempre curte)
+  // Evento de clique na IMAGEM PRINCIPAL (Sempre adiciona curtidas a cada clique)
   if (postMedia) {
     postMedia.addEventListener("click", (e) => {
       e.stopPropagation();
-      addLike();
+      baseLikes++;
+      isLiked = true;
+      updateLikeUI();
     });
   }
-
-  // Clique no botão de salvar (Bookmark)
-  if (bookmarkBtn) {
-    let isBookmarked = false;
-    bookmarkBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      isBookmarked = !isBookmarked;
-
-      const bookmarkSvg = bookmarkBtn.querySelector("svg");
-      if (bookmarkSvg) {
-        bookmarkSvg.style.transition = "transform 0.15s ease, fill 0.15s ease";
-        bookmarkSvg.style.fill = isBookmarked ? "#1c1e21" : "none";
-        bookmarkSvg.style.transform = "scale(1.2)";
-        setTimeout(() => {
-          bookmarkSvg.style.transform = "scale(1)";
-        }, 150);
-      }
-    });
-  }
-
-  // Exibição inicial
-  updateLikesDisplay();
 });

@@ -164,6 +164,21 @@ color: #4b5563;
 color: #1c1e21;
 }
 
+/* Transição para suavizar a troca de cor no coração */
+.action-btn svg {
+  transition: transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease;
+}
+
+/* Estado de curtido */
+.action-btn.liked {
+  color: #ef4444;
+}
+
+.action-btn.liked svg {
+  fill: #ef4444;
+  stroke: #ef4444;
+}
+
 /* Barra de Navegação Inferior */
 .nav-bar {
 display: flex;
