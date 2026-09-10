@@ -5,32 +5,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const likeSvg = likeBtn.querySelector("svg");
   const postMedia = document.querySelector(".post-media");
+  const likesDetails = document.querySelector(".post-details .likes");
 
-  // Estado inicial das curtidas e controle
+  // O contador inicia em 0 a cada carregamento da página
+  let totalLikes = 0;
   let isLiked = false;
-  let baseLikes = 1200; // Valor inicial correspondente a "1.2K"
 
-  // Localiza o texto com o número de curtidas dentro do botão
+  // Localiza o nó de texto dentro do botão
   let textNode = Array.from(likeBtn.childNodes).find(
     (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ""
   );
 
-  // Função para formatar o número (ex: 1201 ou 1.2K se for muito grande)
+  // Formatação para números grandes (ex: 1000 -> 1K)
   function formatLikes(num) {
     if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "K";
+      const formatted = (num / 1000).toFixed(1);
+      return formatted.endsWith(".0") ? `${Math.floor(num / 1000)}K` : `${formatted}K`;
     }
     return num.toString();
   }
 
-  // Atualiza a interface gráfica do botão (Texto, Cor e Animação)
-  function updateLikeUI() {
-    // Atualiza o número no texto
+  // Atualiza a interface gráfica
+  function updateUI() {
+    // Atualiza o texto numérico do botão
     if (textNode) {
-      textNode.textContent = ` ${formatLikes(baseLikes)}`;
+      textNode.textContent = ` ${formatLikes(totalLikes)}`;
     }
 
-    // Altera a cor do coração e classe
+    // Atualiza o texto do rodapé
+    if (likesDetails) {
+      if (totalLikes === 0) {
+        likesDetails.innerHTML = "Seja o primeiro a curtir";
+      } else {
+        likesDetails.innerHTML = `Curtido por <strong>${totalLikes} ${totalLikes === 1 ? 'pessoa' : 'pessoas'}</strong>`;
+      }
+    }
+
+    // Estilização do ícone do coração
     if (isLiked) {
       likeBtn.classList.add("liked");
       likeSvg.style.fill = "#ef4444";
@@ -43,40 +54,31 @@ document.addEventListener("DOMContentLoaded", () => {
       likeSvg.style.color = "#1c1e21";
     }
 
-    // Efeito de pulso/animação no ícone
-    if (likeSvg) {
-      likeSvg.style.transition = "transform 0.15s ease, fill 0.15s ease, stroke 0.15s ease";
-      likeSvg.style.transform = "scale(1.3)";
-      setTimeout(() => {
-        likeSvg.style.transform = "scale(1)";
-      }, 150);
-    }
+    // Animação do botão
+    likeSvg.style.transform = "scale(1.3)";
+    setTimeout(() => {
+      likeSvg.style.transform = "scale(1)";
+    }, 150);
   }
 
-  // Evento de clique no BOTÃO DE CORAÇÃO (Alterna curtir e descurtir)
+  // Clique no botão de coração (soma continuamente)
   likeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
-
-    if (isLiked) {
-      // Se já estava curtido, descurte (-1)
-      isLiked = false;
-      baseLikes = Math.max(0, baseLikes - 1);
-    } else {
-      // Se não estava curtido, adiciona curtida (+1)
-      isLiked = true;
-      baseLikes++;
-    }
-
-    updateLikeUI();
+    totalLikes++;
+    isLiked = true;
+    updateUI();
   });
 
-  // Evento de clique na IMAGEM PRINCIPAL (Sempre adiciona curtidas a cada clique)
+  // Clique na foto (também soma ao contador)
   if (postMedia) {
     postMedia.addEventListener("click", (e) => {
       e.stopPropagation();
-      baseLikes++;
+      totalLikes++;
       isLiked = true;
-      updateLikeUI();
+      updateUI();
     });
   }
+
+  // Define o estado inicial da tela (0 likes)
+  updateUI();
 });
